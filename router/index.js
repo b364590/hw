@@ -76,6 +76,24 @@ router.post('/create/:folderName', (req, res) => {
   res.send('已有該資料夾');
 });
 
+//刪除使用者上傳檔案之資料夾
+router.delete('/delete/:folderName', (req, res) => {
+  const folderName = req.params.folderName;
+
+  // 動態生成資料夾路徑
+  const folderPath = path.join(__dirname, '..', 'UserUploadFolder', folderName);
+
+  
+  if (fs.existsSync(folderPath)) {
+    // 使用 fs.rmdirSync 刪除資料夾
+    fs.rmdirSync(folderPath, { recursive: true });
+
+    return res.send('資料夾刪除成功');
+  }
+
+  res.send('找不到指定的資料夾');
+});
+
 
 
 
