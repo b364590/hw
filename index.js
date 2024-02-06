@@ -25,12 +25,12 @@ app.listen(port, () => {
 
 // 設定 Multer
 const storage = multer.diskStorage({
-    filename: (req, file, cb) => {
-      cb(null, file.originalname);
-    },
-  });
-  
-  const upload = multer({ storage });
+  filename: (req, file, cb) => {
+    cb(null, file.originalname);
+  },
+});
+
+const upload = multer({ storage });
   
   
   

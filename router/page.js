@@ -23,4 +23,22 @@ page.get('/Project', (req, res) => {
 
 });
 
+page.get('/CreateProject', (req, res) => {
+
+    const response = 200;
+
+    res.sendFile(path.join(__dirname, "../build/index.html"));
+
+
+});
+
+page.get('/Download2', (req, res) => {
+
+    const response = 200;
+
+    res.sendFile(path.join(__dirname, "../build/index.html"));
+
+
+});
+
 module.exports = page;

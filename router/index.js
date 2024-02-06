@@ -48,21 +48,21 @@ router.post('/signin', async (req, res) => {
 );
 
 //將創建資料夾的資訊存入資料庫
-router.post('/WCreateProject', (req, res) => {
+router.post('/WCreateFolder', (req, res) => {
   console.log(req.body)
 
   if (req.body.token.includes("Success")) {
     const user = req.body.token.slice(7);//取得Success後面的字串 slice(輸入取用的第幾位之後)
     console.log(user)
-    pool.query(`insert into CreateProject (user, project_name, time) values ('${user}','${req.body.data.project_name}','${String(req.body.data.uploadtime)}');`)
+    pool.query(`insert into CreateFolder (user, folder_name, uploadtime) values ('${user}','${req.body.data.folder_name}','${String(req.body.data.uploadtime)}');`)
     return res.sendStatus(200);
   }
   res.sendStatus(403);
 });
 
 //創建使用者上傳檔案之資料夾
-router.post('/create/:folderName', (req, res) => {
-  const folderName = req.params.folderName;
+router.post('/CreateFolder', (req, res) => {
+  const folderName = req.body.name
 
   // 動態生成資料夾路徑
   const folderPath = path.join(__dirname, '..', 'UserUploadFolder', folderName);
@@ -70,14 +70,15 @@ router.post('/create/:folderName', (req, res) => {
   // 如果資料夾不存在，則建立
   if (!fs.existsSync(folderPath)) {
     fs.mkdirSync(folderPath, { recursive: true });
-    return res.send('檔案上傳成功');
+    console.log(folderName)
+    return res.send('Success'+folderName);
   }
 
-  res.send('已有該資料夾');
+  res.send('fail   ');
 });
 
 //刪除使用者上傳檔案之資料夾
-router.delete('/delete/:folderName', (req, res) => {
+router.delete('/DeleteFolder/:folderName', (req, res) => {
   const folderName = req.params.folderName;
 
   // 動態生成資料夾路徑
@@ -88,14 +89,30 @@ router.delete('/delete/:folderName', (req, res) => {
     // 使用 fs.rmdirSync 刪除資料夾
     fs.rmdirSync(folderPath, { recursive: true });
 
-    return res.send('資料夾刪除成功');
+    return res.send('Success');
   }
 
-  res.send('找不到指定的資料夾');
+  res.send("can't find");
 });
 
+//使用者上傳檔案至資料庫
+router.post('/upload', (req, res) => {
+  console.log(req.body)
 
-
+  if (req.body.token.includes("Success") && req.body.folder.includes("Success")) {
+    const folder = req.body.folder.slice(7);//取得Success後面的字串 slice(輸入取用的第幾位之後)
+    const user = req.body.token.slice(7);
+    console.log(user)
+    console.log(folder)
+    console.log(req.body.data.project_name)
+    console.log(req.body.data.project_data)
+    console.log(req.body.data.uploadtime)
+    
+    pool.query(`insert into Project (u0ser, folder, project_name, project_data, upload_time) values ('${user}', '${folder}', '${req.body.data.project_name}', '${req.body.data.project_data}', '${String(req.body.data.uploadtime)}');`)
+    return res.sendStatus(200);
+  }
+  res.sendStatus(403);
+});
 
 
 module.exports = router;

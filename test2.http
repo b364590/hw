@@ -1,4 +1,5 @@
-POST    http://localhost:8080/create/50
+POST    http://localhost:8080/upload
 Content-Type:application/json
 
-{"folderName":"111"}
+{"folder":"Success55","token":"Success12","data":{"project_name":1, "project_data":2, "upload_time":3}}
+
