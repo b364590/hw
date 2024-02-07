@@ -48,21 +48,21 @@ router.post('/signin', async (req, res) => {
 );
 
 //將創建資料夾的資訊存入資料庫
-router.post('/WCreateProject', (req, res) => {
+router.post('/WCreateFolder', (req, res) => {
   console.log(req.body)
 
   if (req.body.token.includes("Success")) {
     const user = req.body.token.slice(7);//取得Success後面的字串 slice(輸入取用的第幾位之後)
     console.log(user)
-    pool.query(`insert into CreateProject (user, project_name, time) values ('${user}','${req.body.data.project_name}','${String(req.body.data.uploadtime)}');`)
+    pool.query(`insert into CreateFolder (user, folder_name, uploadtime) values ('${user}','${req.body.data.folder_name}','${String(req.body.data.uploadtime)}');`)
     return res.sendStatus(200);
   }
   res.sendStatus(403);
 });
 
 //創建使用者上傳檔案之資料夾
-router.post('/create/:folderName', (req, res) => {
-  const folderName = req.params.folderName;
+router.post('/CreateFolder', (req, res) => {
+  const folderName = req.body.data.name
 
   // 動態生成資料夾路徑
   const folderPath = path.join(__dirname, '..', 'UserUploadFolder', folderName);
@@ -70,32 +70,69 @@ router.post('/create/:folderName', (req, res) => {
   // 如果資料夾不存在，則建立
   if (!fs.existsSync(folderPath)) {
     fs.mkdirSync(folderPath, { recursive: true });
-    return res.send('檔案上傳成功');
+    console.log(folderName)
+    return res.send('Success' + folderName);
   }
 
-  res.send('已有該資料夾');
+  res.send('fail   ');
 });
 
-//刪除使用者上傳檔案之資料夾
-router.delete('/delete/:folderName', (req, res) => {
+//刪除使用者上傳檔案之資料夾(還沒用到)
+router.delete('/DeleteFolder/:folderName', (req, res) => {
   const folderName = req.params.folderName;
 
   // 動態生成資料夾路徑
   const folderPath = path.join(__dirname, '..', 'UserUploadFolder', folderName);
 
-  
+
   if (fs.existsSync(folderPath)) {
     // 使用 fs.rmdirSync 刪除資料夾
     fs.rmdirSync(folderPath, { recursive: true });
 
-    return res.send('資料夾刪除成功');
+    return res.send('Success');
   }
 
-  res.send('找不到指定的資料夾');
+  res.send("can't find");
+});
+
+//使用者上傳檔案至後端及資料庫
+router.post('/upload', (req, res) => {
+
+  const user = req.body.prevdata[0]['user'];
+  const folder = req.body.prevdata[0]['folder'];
+  const project_name = req.body.prevdata[0]['project_name'];
+  const project_data = req.body.prevdata[0]['project_data'];
+  const upload_time = req.body.prevdata[0]['upload_time'];
+  console.log(req.body.prevdata)
+  
+  console.log(user)
+
+  pool.query(`insert into Project (user, folder, project_name, project_data, upload_time) values ('${user}', '${folder}', '${project_name}', '${project_data}', '${String(upload_time)}');`)
+  res.sendStatus(200);
+
+  const folderPath = path.join(__dirname, '../UserUploadFolder',  folder);
+  const imagePath = path.join(folderPath, project_name[0]); 
+  const base64Data = project_data[0].replace(/^data:image\/jpeg;base64,/, ""); 
+  fs.writeFileSync(imagePath, base64Data, 'base64');
+
 });
 
 
+//獲取有哪些資料夾
+router.get('/WCreateFolder', (req, res) => {
+  // SQL 查詢語句，檢索所需的列
+  const query = 'SELECT id, folder_name FROM CreateFolder';
 
+  // 執行 SQL 查詢
+  pool.query(query, (error, results, fields) => {
+    if (error) {
+      console.error('Error executing query: ', error);
+      res.status(500).json({ error: 'An error occurred while fetching data' });
+      return;
+    }
 
-
+    // 將檢索到的資料返回給前端
+    res.json(results);
+  });
+});
 module.exports = router;
