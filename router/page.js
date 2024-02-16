@@ -41,4 +41,31 @@ page.get('/Download2', (req, res) => {
 
 });
 
+page.get('/steppage', (req, res) => {
+
+    const response = 200;
+
+    res.sendFile(path.join(__dirname, "../build/index.html"));
+
+
+});
+
+page.get('/Requirement', (req, res) => {
+
+    const response = 200;
+
+    res.sendFile(path.join(__dirname, "../build/index.html"));
+
+
+});
+
+page.get('/CheckData', (req, res) => {
+
+    const response = 200;
+
+    res.sendFile(path.join(__dirname, "../build/index.html"));
+
+
+});
+
 module.exports = page;

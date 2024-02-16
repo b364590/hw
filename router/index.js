@@ -62,8 +62,9 @@ router.post('/WCreateFolder', (req, res) => {
 
 //創建使用者上傳檔案之資料夾
 router.post('/CreateFolder', (req, res) => {
-  const folderName = req.body.data.name
-
+  const folderName = req.body.data.folder_name
+  console.log("test")
+  console.log(req.body)
   // 動態生成資料夾路徑
   const folderPath = path.join(__dirname, '..', 'UserUploadFolder', folderName);
 
@@ -78,8 +79,23 @@ router.post('/CreateFolder', (req, res) => {
 });
 
 //刪除使用者上傳檔案之資料夾(還沒用到)
-router.delete('/DeleteFolder/:folderName', (req, res) => {
-  const folderName = req.params.folderName;
+router.delete('/DeleteFolder/:folder_name', (req, res) => {
+
+  const folderName = req.params.folder_name;
+
+  pool.query(`DELETE FROM Project WHERE folder = '${folderName}'`, (err, result) => {
+    if (err) {
+      console.error('Error deleting database record:', err);
+      return res.status(500).send('Error deleting database record');
+    }
+  })
+
+  pool.query(`DELETE FROM CreateFolder WHERE folder_name = '${folderName}'`, (err, result) => {
+    if (err) {
+      console.error('Error deleting database record:', err);
+      return res.status(500).send('Error deleting database record');
+    }
+  })
 
   // 動態生成資料夾路徑
   const folderPath = path.join(__dirname, '..', 'UserUploadFolder', folderName);
@@ -98,21 +114,20 @@ router.delete('/DeleteFolder/:folderName', (req, res) => {
 //使用者上傳檔案至後端及資料庫
 router.post('/upload', (req, res) => {
 
-  const user = req.body.prevdata[0]['user'];
-  const folder = req.body.prevdata[0]['folder'];
-  const project_name = req.body.prevdata[0]['project_name'];
-  const project_data = req.body.prevdata[0]['project_data'];
-  const upload_time = req.body.prevdata[0]['upload_time'];
-  console.log(req.body.prevdata)
-  
-  console.log(user)
+  console.log(req.body.data)
+
+  const user = req.body.data.user
+  const folder = req.body.data.folder
+  const project_name = req.body.data.project_name
+  const project_data = req.body.data.project_data
+  const upload_time = req.body.data.upload_time
 
   pool.query(`insert into Project (user, folder, project_name, project_data, upload_time) values ('${user}', '${folder}', '${project_name}', '${project_data}', '${String(upload_time)}');`)
   res.sendStatus(200);
 
-  const folderPath = path.join(__dirname, '../UserUploadFolder',  folder);
-  const imagePath = path.join(folderPath, project_name[0]); 
-  const base64Data = project_data[0].replace(/^data:image\/jpeg;base64,/, ""); 
+  const folderPath = path.join(__dirname, '../UserUploadFolder', folder);
+  const imagePath = path.join(folderPath, project_name[0]);
+  const base64Data = project_data[0].replace(/^data:image\/jpeg;base64,/, "");
   fs.writeFileSync(imagePath, base64Data, 'base64');
 
 });
@@ -134,5 +149,27 @@ router.get('/WCreateFolder', (req, res) => {
     // 將檢索到的資料返回給前端
     res.json(results);
   });
+});
+
+//requirement
+router.post('/Requirement', (req, res) => {
+
+  console.log(req.body.data)
+
+  const jsonData = JSON.stringify(req.body.data, null, 2);
+
+  // 指定保存的文件路径和文件名
+  const fileName = 'requirement.json'
+  const filePath = path.join(__dirname, '..', fileName); // 外层目录
+  console.log(jsonData)
+  // 将 JSON 数据写入本地文件
+  fs.writeFile(filePath, jsonData, 'utf8', (err) => {
+    if (err) {
+      console.error('Error writing JSON file:', err);
+    } else {
+      console.log('JSON file saved successfully!');
+    }
+  });
+
 });
 module.exports = router;
