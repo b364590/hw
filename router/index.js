@@ -155,12 +155,14 @@ router.get('/WCreateFolder', (req, res) => {
 router.post('/Requirement', (req, res) => {
 
   console.log(req.body.data)
-
+  
+  const user =req.body.inform.Username
+  const time =req.body.inform.uploadtime
   const jsonData = JSON.stringify(req.body.data, null, 2);
 
   // 指定保存的文件路径和文件名
   const fileName = 'requirement.json'
-  const filePath = path.join(__dirname, '..', fileName); // 外层目录
+  const filePath = path.join(__dirname, '../UserUploadFolder', fileName); // 外层目录
   console.log(jsonData)
   // 将 JSON 数据写入本地文件
   fs.writeFile(filePath, jsonData, 'utf8', (err) => {
@@ -168,8 +170,9 @@ router.post('/Requirement', (req, res) => {
       console.error('Error writing JSON file:', err);
     } else {
       console.log('JSON file saved successfully!');
+      console.log(req.body.inform);
     }
   });
-
+  pool.query(`insert into Requirement (requirement_path, author, uploadtime) values ('${filePath}', '${user}', '${String(time)}');`)
 });
 module.exports = router;
